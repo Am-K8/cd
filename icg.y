@@ -1,12 +1,14 @@
+
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 void yyerror(char*);
 void Gen(char*);
-char temp2[50];
+char temp2[100];
 int yylex(void);
-int i, j=0;
+int j=0;
+int i = 100;
 %}
 
 %union {
@@ -26,18 +28,17 @@ int i, j=0;
 %% 
 
 s       : IF '(' COND ')' '{' stmt_list '}' 
-          { sprintf(temp2, "\nt%d=if(%s){%s}",i, $3, $6); $$ = strdup("t"); i++;Gen(temp2); }
+          { sprintf(temp2, "\nt%d=if(%s){%s}",i, $3, $6);sprintf($$, "t%d", i); i++;Gen(temp2); }
         ;
 
 stmt_list
         : stmt
-        | stmt stmt_list
+        | stmt stmt_list { sprintf(temp2, "%s ; %s", $1, $2); $$ = strdup(temp2);}
         ;
 
-stmt    : ID '=' exp ';'
+stmt    : ID '=' exp ';' 
           { sprintf(temp2, "\nt%d=%s=%s",j, $1, $3); sprintf($$, "t%d", j);j++; Gen(temp2); }
-        | IF '(' COND ')' '{' stmt_list '}'  
-          { sprintf(temp2, "\nt%d=if(%s){%s}",j, $3, $6); sprintf($$, "t%d", j);j++; Gen(temp2); }  
+        | s {$$ = strdup($1); }
         ;
 
 exp     : exp '+' exp
